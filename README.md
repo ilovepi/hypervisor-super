@@ -27,9 +27,35 @@ that we have support for custom build scripts from Bareflank.
 
 ### Build the Bareflank Hypervisor and the Hyperkernel
 
-`CROSS_CXXFLAGS="<desired compile flags for the hypevisor>" make`
+```
+cd hypervisor
+export CROSS_CCFLAGS="<desired compile flags for the hypevisor>"
+export CROSS_CXXFLAGS="<desired compile flags for the hypevisor>"
+export CROSS_LDFLAGS="<desired compile flags for the hypevisor>"
+make
+```
 
+For example:
 
+```
+cd hypervisor
+export CROSS_CCFLAGS="-Xclang -nop-insertion -mllvm -shuffle-stack-frames -mllvm -max-stack-pad-size=64 -mllvm -randomize-machine-registers -mllvm -shuffle-globals -mllvm -global-padding-percentage=50 -mllvm -global-padding-max-size=64 -frandom-seed=123"
+export CROSS_CXXFLAGS="-Xclang -nop-insertion -mllvm -shuffle-stack-frames -mllvm -max-stack-pad-size=64 -mllvm -randomize-machine-registers -mllvm -shuffle-globals -mllvm -global-padding-percentage=50 -mllvm -global-padding-max-size=64 -frandom-seed=123"
+export CROSS_LDFLAGS="--random-seed=123"
+make
+```
+
+### Run Test
+
+```
+make driver_load
+make quick
+
+./makefiles/hyperkernel/bfexec/bin/native/bfexec ./makefiles/hyperkernel/tests/basic_driver/bin/cross/basic_driver ./makefiles/hyperkernel/tests/basic_c/bin/cross/basic_c
+./makefiles/hyperkernel/bfexec/bin/native/bfexec ./makefiles/hyperkernel/tests/basic_cxx/bin/cross/basic_cxx
+
+make stop
+```
 
 ## Manual Installation Instructions
 ### Checkout the Bareflank Hypervisor Source Code
@@ -50,7 +76,7 @@ code and install any package dependencies. By default we use the Bareflank's
 `setup_ubuntu_.sh` so if your version of Linux is not ubuntu, please change the
 `build_cross_compiler.sh` script to reflect the change in OS. You may also want
 to check which packages and software the setup scripts will install on your
-system, and comment out the sections you find objectionable. 
+system, and comment out the sections you find objectionable.
 
 If you require no package dependencies, and want to build a local version of the cross compiler you may also substitute the following commands inplace of what is done in the build scripts:
 
@@ -65,7 +91,7 @@ To build the hypervisor:
 
 `CROSS_CXXFLAGS="<desired compile flags for the hypevisor>" make`
 
-Note: the Makefile mirrors all `CROSS_CXXFLAGS` to `CROSS_CCFLAGS` and `CROSS_LDFLAGS` 
+Note: the Makefile mirrors all `CROSS_CXXFLAGS` to `CROSS_CCFLAGS` and `CROSS_LDFLAGS`
 
 
 ## To use the Multicompiler as the Bareflank 'Native' Compiler
@@ -102,11 +128,11 @@ indicates. In the future these roles may be available on Ansible-Galaxy.
 The project can installed by:
 
 ```
-git clone -b jenkins https://github.com/ilovepi/vagrant-ansible-provisioning.git provision 
+git clone -b jenkins https://github.com/ilovepi/vagrant-ansible-provisioning.git provision
 
-cd provision 
+cd provision
 
-ansible-galaxy install -r requirements.yml ansible-playbook -i inventory playbook.yml --tags initialize 
+ansible-galaxy install -r requirements.yml ansible-playbook -i inventory playbook.yml --tags initialize
 
 ```
 
@@ -119,5 +145,3 @@ file.
 
 See http://docs.ansible.com/ansible/playbooks_roles.html for more detailed
 information.
-
-
